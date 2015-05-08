@@ -34,12 +34,11 @@ class ErrorFactory {
 		}
 
 		if code == -1003 {
-			errorTitle = "Bad URL" // Needs to match page wording
-			errorMessage = "Please check Website URL"
+			errorTitle = "Bad Address" // Needs to match page wording
+			errorMessage = "Confirm Address in Account Settings"
 		}
 
 		let errorAlert = UIAlertController(title: errorTitle, message: errorMessage, preferredStyle: UIAlertControllerStyle.Alert)
-
 		let errorAlertDetail = UIAlertController(title: errorDetailTitle, message: errorDetailMessage as String, preferredStyle: UIAlertControllerStyle.Alert)
 
 		errorAlert.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Cancel, handler:{ (ACTION :UIAlertAction!)in }))

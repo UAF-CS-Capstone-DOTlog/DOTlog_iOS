@@ -16,9 +16,12 @@ class ViewAddEventHub: UITableViewController {
 	let managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
 
 	var hubs : [String] = []
-	var currentHub : String? = nil
+	
+	var currentAirport : String?
+	var currentHub : String?
 	var currentDistrict : String?
-
+	var currentRegion : String?
+	
 	override func viewWillAppear(animated: Bool){
 		super.viewWillAppear(animated)
 		resetPage()
@@ -34,14 +37,12 @@ class ViewAddEventHub: UITableViewController {
 
 	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 		var cell : UITableViewCell?
-
 		if hubs[indexPath.row] == currentHub {
 			cell = tableView.dequeueReusableCellWithIdentifier("selectedHubCell") as! UITableViewCell?
 		}
 		else {
 			cell = tableView.dequeueReusableCellWithIdentifier("hubCell") as! UITableViewCell?
 		}
-
 		cell?.textLabel?.text = hubs[indexPath.row]
 
 		return cell!
@@ -51,7 +52,6 @@ class ViewAddEventHub: UITableViewController {
 		let cell = self.tableView.cellForRowAtIndexPath(indexPath)
 		currentHub = cell?.textLabel?.text
 		performSegueWithIdentifier("SegueHubsToAirports", sender: self)
-
 	}
 
 	func resetPage() {
@@ -69,7 +69,10 @@ class ViewAddEventHub: UITableViewController {
 	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 		if segue.identifier == "SegueHubsToAirports" {
 			var destinationViewController = segue.destinationViewController as! ViewAddEventAirport
+			destinationViewController.currentRegion = currentRegion
+			destinationViewController.currentDistrict = currentDistrict
 			destinationViewController.currentHub = currentHub
+			destinationViewController.currentAirport = currentAirport
 		}
 	}
 

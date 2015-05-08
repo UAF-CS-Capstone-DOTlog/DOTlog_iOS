@@ -191,7 +191,7 @@
                         <barButtonItem key="rightBarButtonItem" title="Save" id="uaI-Oz-4IE">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
-                                <action selector="saveEvent:" destination="AAj-fc-vBz" id="mQd-bb-2e2"/>
+                                <action selector="ButtonSaveEvent:" destination="AAj-fc-vBz" id="c0b-74-c8a"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -232,6 +232,12 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="selectedRegionCell" id="vMb-bK-fQr">
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="vMb-bK-fQr" id="wQH-9E-oLq">
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
                         </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="yY6-Jr-q3U" id="yDX-iI-ElD"/>
@@ -259,6 +265,12 @@
                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="districtCell" id="bGg-N1-SRL">
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="bGg-N1-SRL" id="wpF-hG-Jwv">
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="selectedDistrictCell" id="002-cy-bwW">
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="002-cy-bwW" id="CI9-cu-Ogq">
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
@@ -292,6 +304,12 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="selectedHubCell" id="Ykl-Ps-ry8">
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Ykl-Ps-ry8" id="bl0-pO-GRl">
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
                         </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="Nvr-uG-OUK" id="ZKf-zI-aFZ"/>
@@ -319,6 +337,12 @@
                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="airportCell" id="yfA-K4-AY8">
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="yfA-K4-AY8" id="6vZ-tf-LR1">
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="selectedAirportCell" id="OTS-A4-k3S">
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="OTS-A4-k3S" id="ZvU-iI-ftX">
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
@@ -866,8 +890,8 @@
         <image name="settings.png" width="30" height="29"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="WEO-KV-afo"/>
-        <segue reference="D5A-TR-aiZ"/>
-        <segue reference="KLP-0v-yct"/>
+        <segue reference="Fyg-Ok-NxM"/>
+        <segue reference="eFu-Mh-H4p"/>
+        <segue reference="lO5-iV-La5"/>
     </inferredMetricsTieBreakers>
 </document>

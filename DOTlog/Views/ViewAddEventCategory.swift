@@ -24,7 +24,6 @@ class ViewAddEventCategory: UITableViewController {
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
-
 	}
 
 	override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -33,14 +32,12 @@ class ViewAddEventCategory: UITableViewController {
 
 	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 		var cell : UITableViewCell?
-
 		if categories[indexPath.row] == currentCategory {
 			cell = tableView.dequeueReusableCellWithIdentifier("selectedCategoryCell") as! UITableViewCell?
 		}
 		else {
 			cell = tableView.dequeueReusableCellWithIdentifier("categoryCell") as! UITableViewCell?
 		}
-
 		cell?.textLabel?.text = categories[indexPath.row]
 
 		return cell!
@@ -65,7 +62,6 @@ class ViewAddEventCategory: UITableViewController {
 
 	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 		var destinationViewController = segue.destinationViewController as! ViewAddEvent
-
 		if segue.identifier == "SegueCategoryToAddEvent" {
 			destinationViewController.UIFieldCategory.text = currentCategory
 		}

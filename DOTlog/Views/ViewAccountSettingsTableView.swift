@@ -32,7 +32,6 @@ class ViewAccountSettingsTableView: UITableViewController, UITextFieldDelegate {
 	}
 
 	override func viewWillAppear(animated: Bool){
-		// Populates URL, then replaces with remembered if present
 		populateURL()
 
 		if let username = keychainObj.getUsername(){
@@ -63,37 +62,37 @@ class ViewAccountSettingsTableView: UITableViewController, UITextFieldDelegate {
 	func saveURL () {
 		var error: NSError?
 		var errorMessage : String = "Could not save URL - coredata save failure."
-		deleteOldURL()
 		var scheme : String = "https"
 
-		if let baseURLUnstrippedTry = NSURLComponents(string: UIFieldBaseURL.text) {
-			var baseURLUnstripped = baseURLUnstrippedTry
-			if let baseURLScheme : String = baseURLUnstripped.scheme {
+		deleteOldURL()
+
+		if let userURLFromInput = NSURLComponents(string: UIFieldBaseURL.text) {
+			var userURL = userURLFromInput
+			if let baseURLScheme : String = userURL.scheme {
 				scheme = baseURLScheme
 			}
-
-			deleteOldURL()
-
-			if let urlHostWithOrWithoutBase = baseURLUnstripped.host {
-			}
 			else {
-				if let baseURLUnstrippedWithScheme = NSURLComponents(string: scheme + "://" + UIFieldBaseURL.text) {
-					baseURLUnstripped = baseURLUnstrippedWithScheme
+				if let urlWithSchemeAdded = NSURLComponents(string: scheme + "://" + UIFieldBaseURL.text) {
+					userURL = urlWithSchemeAdded
 				}
 			}
 
+			if let urlHost = userURL.host {
+				if urlHost != "" {
+					let entityDescription =
+					NSEntityDescription.entityForName("SyncURLEntry",
+						inManagedObjectContext: managedObjectContext!)
 
-			if let urlHost = baseURLUnstripped.host {
-				// Create new
-				let entityDescription =
-				NSEntityDescription.entityForName("SyncURLEntry",
-					inManagedObjectContext: managedObjectContext!)
+					let url = SyncURLEntry(entity: entityDescription!,
+						insertIntoManagedObjectContext: managedObjectContext)
 
-				let url = SyncURLEntry(entity: entityDescription!,
-					insertIntoManagedObjectContext: managedObjectContext)
-
-				url.urlString = scheme + "://" + urlHost
-				managedObjectContext?.save(&error)
+					url.urlString = scheme + "://" + urlHost
+					managedObjectContext?.save(&error)
+				}
+				else {
+					errorMessage = "No domain found in \(UIFieldBaseURL.text)"
+					error = NSError (domain: "Cannot Save: No Domain", code: 32, userInfo : ["NSLocalizedDescriptionKey":errorMessage])
+				}
 			}
 			else {
 				errorMessage = "Could not parse domain from \(UIFieldBaseURL.text)"
@@ -117,7 +116,6 @@ class ViewAccountSettingsTableView: UITableViewController, UITextFieldDelegate {
 	}
 
 	func deleteOldURL () {
-		// Delete old
 		let fetch = NSFetchRequest (entityName:"SyncURLEntry")
 		let entries = managedObjectContext!.executeFetchRequest(fetch, error:nil) as! [SyncURLEntry]
 		for entry in entries {
@@ -130,11 +128,8 @@ class ViewAccountSettingsTableView: UITableViewController, UITextFieldDelegate {
 		saveURL()
 
 		let CredsSavedAlert = UIAlertController(title: "Credentials Saved", message: nil, preferredStyle: UIAlertControllerStyle.Alert)
-
 		CredsSavedAlert.addAction(UIAlertAction(title: "Okay", style: UIAlertActionStyle.Default, handler:{ (ACTION :UIAlertAction!)in }))
-
 		presentViewController(CredsSavedAlert, animated: true, completion: nil)
-
 	}
 
 	func saveCreds () {
@@ -149,27 +144,24 @@ class ViewAccountSettingsTableView: UITableViewController, UITextFieldDelegate {
 
 	@IBAction func ButtonLogout(sender: AnyObject) {
 
-		let UnSyncedAlert = UIAlertController(title: "Unsynced Messages", message: "Sync or delete messages before logout", preferredStyle: UIAlertControllerStyle.Alert)
+		let unsyncedEventsAlert = UIAlertController(title: "Unsynced Messages", message: "Sync or delete messages before logout", preferredStyle: UIAlertControllerStyle.Alert)
+		let logoutConfirmAlert = UIAlertController(title: "Logout Will Exit DOTlog", message: "All data will be saved.", preferredStyle: UIAlertControllerStyle.Alert)
+		let deleteEventsObj = APIEventResource(baseURLString: "/");
 
-		let LogoutAlert = UIAlertController(title: "Logout Will Exit DOTlog", message: "All data will be saved.", preferredStyle: UIAlertControllerStyle.Alert)
+		logoutConfirmAlert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler:{ (ACTION :UIAlertAction!)in }))
+		unsyncedEventsAlert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler:{ (ACTION :UIAlertAction!)in }))
 
-		let tempEventChecker = APIEventResource(baseURLString: "/");
-
-		LogoutAlert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler:{ (ACTION :UIAlertAction!)in }))
-
-		UnSyncedAlert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler:{ (ACTION :UIAlertAction!)in }))
-
-		LogoutAlert.addAction(UIAlertAction(title: "Logout", style: UIAlertActionStyle.Default,
-			handler:
-				{ (ACTION :UIAlertAction!)in
-					self.forgetCreds(); exit(0);
-				}
-			))
-
-		UnSyncedAlert.addAction(UIAlertAction(title: "Delete Events", style: UIAlertActionStyle.Default,
+		logoutConfirmAlert.addAction(UIAlertAction(title: "Logout", style: UIAlertActionStyle.Default,
 			handler:
 			{ (ACTION :UIAlertAction!)in
-				tempEventChecker.deleteOld();self.presentViewController(LogoutAlert, animated: true, completion: nil)
+				self.forgetCreds(); exit(0);
+			}
+		))
+
+		unsyncedEventsAlert.addAction(UIAlertAction(title: "Delete Events", style: UIAlertActionStyle.Default,
+			handler:
+			{ (ACTION :UIAlertAction!)in
+				deleteEventsObj.deleteOld(); self.presentViewController(logoutConfirmAlert, animated: true, completion: nil)
 			}
 		))
 
@@ -178,10 +170,10 @@ class ViewAccountSettingsTableView: UITableViewController, UITextFieldDelegate {
 		let events = managedObjectContext!.executeFetchRequest(fetch, error:nil) as! [EventEntry]
 
 		if events.count != 0 {
-			presentViewController(UnSyncedAlert, animated: true, completion: nil)
+			presentViewController(unsyncedEventsAlert, animated: true, completion: nil)
 		}
 		else {
-			presentViewController(LogoutAlert, animated: true, completion: nil)
+			presentViewController(logoutConfirmAlert, animated: true, completion: nil)
 		}
 	}
 
@@ -189,6 +181,5 @@ class ViewAccountSettingsTableView: UITableViewController, UITextFieldDelegate {
 		super.didReceiveMemoryWarning()
 		// Dispose of any resources that can be recreated.
 	}
-
 }
 

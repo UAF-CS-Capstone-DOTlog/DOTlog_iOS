@@ -56,11 +56,11 @@ class ViewEventList: UIViewController, UITableViewDelegate, UITableViewDataSourc
 			var locationInView = longPress.locationInView(entryTableView)
 			var indexPath = entryTableView.indexPathForRowAtPoint(locationInView)
 
-			let cellActionSheet = createDeleteEventActionSheet()
+			let deleteCellActionSheet = createDeleteEventActionSheet()
 			if let indexPathVal = indexPath {
-				cellActionSheet.accessibilityElements = [] as [NSIndexPath]
-				cellActionSheet.accessibilityElements.append(indexPathVal)
-				cellActionSheet.showInView(self.view)
+				deleteCellActionSheet.accessibilityElements = [] as [NSIndexPath]
+				deleteCellActionSheet.accessibilityElements.append(indexPathVal)
+				deleteCellActionSheet.showInView(self.view)
 			}
 		}
 	}

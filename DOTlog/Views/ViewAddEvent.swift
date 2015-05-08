@@ -14,85 +14,62 @@ let SUMMARYCHARLIMIT : Int = 4000
 
 class ViewAddEvent: UITableViewController, UITextFieldDelegate, UITextViewDelegate {
 
-	let uninitializedString = "Must Run Sync"
-	let notSyncedAlert = UIAlertController(title: "Must Run Sync", message: "Please sync for airport & category lists", preferredStyle: .Alert)
+	let airportNotSelectedAlert = UIAlertController(title: "No Airport", message: "Please select an airport", preferredStyle: .Alert)
 	let categoryNotSelectedAlert = UIAlertController(title: "No Category", message: "Please select a category", preferredStyle: .Alert)
 	let noEventSummaryAlert = UIAlertController(title: "No Event Summary", message: "Please enter an event summary", preferredStyle: .Alert)
 	let managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
 
-	var airports : [String] = []
+	var datePicker  : UIDatePicker! = UIDatePicker()
+	var dateFormatter :NSDateFormatter = NSDateFormatter()
+	var currentRegion : String? = nil
+	var currentDistrict : String? = nil
+	var currentHub : String? = nil
 
-	var pickerTime  : UIDatePicker! = UIDatePicker()
-
+	@IBOutlet weak var UIFieldAirport: UITextField!
 	@IBOutlet weak var UIFieldCategory: UITextField!
 	@IBOutlet weak var UIFieldSummary: UITextView!
 	@IBOutlet weak var UIFieldTime: UITextField!
-	@IBOutlet weak var UIFieldAirport: UITextField!
-
 	@IBOutlet weak var UISwitchInWeeklyReport: UISwitch!
-
-	@IBAction func editEventTime(sender: UITextField) {
-		pickerTime.datePickerMode = UIDatePickerMode.DateAndTime
-		sender.inputView = pickerTime
-		pickerTime.addTarget(self, action: Selector("setEventTime:"), forControlEvents: UIControlEvents.ValueChanged)
-	}
-
-	func setEventTime(sender: UIDatePicker) {
-		var timeFormatter = NSDateFormatter()
-		timeFormatter.dateFormat = "MMM dd yyyy hh:mm a"
-		UIFieldTime.text = timeFormatter.stringFromDate(sender.date)
-	}
-
-	override func viewWillAppear(animated: Bool){
-		super.viewWillAppear(animated)
-	}
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
-
-		self.notSyncedAlert.addAction(UIAlertAction(title: "Dismiss",
+		self.noEventSummaryAlert.addAction(UIAlertAction(title: "Dismiss",
 			style: UIAlertActionStyle.Default,
 			handler: {(alert: UIAlertAction!) in}))
-		self.noEventSummaryAlert.addAction(UIAlertAction(title: "Dismiss",
+		self.airportNotSelectedAlert.addAction(UIAlertAction(title: "Dismiss",
 			style: UIAlertActionStyle.Default,
 			handler: {(alert: UIAlertAction!) in}))
 		self.categoryNotSelectedAlert.addAction(UIAlertAction(title: "Dismiss",
 			style: UIAlertActionStyle.Default,
 			handler: {(alert: UIAlertAction!) in}))
+		dateFormatter.dateFormat = "MMM dd yyyy hh:mm a"
 
 		resetPage()
-
 	}
 
 	func resetPage() {
-		let airportFetch = NSFetchRequest (entityName:"AirportEntry")
-		if let airportResults = managedObjectContext!.executeFetchRequest(airportFetch, error:nil) as? [AirportEntry]{
-			airports = Array<String>() // Clear old array
-			for airport in airportResults {
-				airports.append(airport.faa_code)
-			}
-		}
+		let fetchAirports = NSFetchRequest (entityName: "AirportEntry")
+		let airports = managedObjectContext!.executeFetchRequest(fetchAirports, error: nil) as! [AirportEntry]
+		UIFieldAirport.text = airports[0].faa_code
+		currentHub = airports[0].hub.hub_name
+		currentDistrict = airports[0].hub.district.district_name
+		currentRegion = airports[0].hub.district.region.region_name
 
-		if airports.count == 0 {
-			airports = [uninitializedString]
-		}
-
-		UIFieldAirport.text = ""
 		UIFieldCategory.text = ""
-		pickerTime.date = NSDate()
-		setEventTime(pickerTime)
+		datePicker.date = NSDate()
+		setEventTime(datePicker)
 		UISwitchInWeeklyReport.on = false
 		UIFieldSummary.text = ""
 	}
 
-	@IBAction func saveEvent(sender: AnyObject) {
+	@IBAction func ButtonSaveEvent(sender: AnyObject) {
 
-		if UIFieldCategory.text == uninitializedString || UIFieldAirport.text == uninitializedString {
-			self.presentViewController(notSyncedAlert, animated: true, completion:nil)
+		if UIFieldCategory.text == "" {
+			self.presentViewController(categoryNotSelectedAlert, animated: true, completion:nil)
 		}
 
-		else if UIFieldCategory.text == "" {
-			self.presentViewController(categoryNotSelectedAlert, animated: true, completion:nil)
+		if UIFieldAirport.text == "" {
+			self.presentViewController(airportNotSelectedAlert, animated: true, completion:nil)
 		}
 
 		else if UIFieldSummary.text == "" {
@@ -100,8 +77,8 @@ class ViewAddEvent: UITableViewController, UITextFieldDelegate, UITextViewDelega
 		}
 
 		else if count(UIFieldSummary.text) > SUMMARYCHARLIMIT {
+			// Local alert declaration due to character count message being unknown at construction
 			let summaryLengthAlert = UIAlertController(title: "Character Limit Exceeded", message: "Maximum Characters: \(String(SUMMARYCHARLIMIT))\nCurrent Characters: \(String(count(UIFieldSummary.text)))", preferredStyle: .Alert)
-
 			summaryLengthAlert.addAction(UIAlertAction(title: "Dismiss",
 				style: UIAlertActionStyle.Default,
 				handler: {(alert: UIAlertAction!) in}))
@@ -110,82 +87,49 @@ class ViewAddEvent: UITableViewController, UITextFieldDelegate, UITextViewDelega
 		}
 
 		else {
-			let entityDescription =
-			NSEntityDescription.entityForName("EventEntry",
-				inManagedObjectContext: managedObjectContext!)
-
-			let event = EventEntry(entity: entityDescription!,
-				insertIntoManagedObjectContext: managedObjectContext)
-
-			event.faa_code = UIFieldAirport.text
-			event.category_title = UIFieldCategory.text
-			event.event_text = UIFieldSummary.text
-			event.in_weekly_report = UISwitchInWeeklyReport.on
-
-			var dateFormatter:NSDateFormatter = NSDateFormatter()
-			dateFormatter.dateFormat = "MMM dd yyyy hh:mm a"
-			var tempDate:String = UIFieldTime.text
-
-			event.event_time = dateFormatter.dateFromString (tempDate)!
-
-			var error: NSError?
-
-			managedObjectContext?.save(&error)
-
-			if let err = error {
-				//submissionStatus.text = err.localizedFailureReason;
-			} else {
-				//submissionStatus.text = "Event Saved"
-				var vc = self.storyboard?.instantiateViewControllerWithIdentifier("TabBarViewController") as! TabBarViewController
-				self.presentViewController(vc, animated: true, completion: nil)
-			}
-		}
-
-	}
-
-	override func didReceiveMemoryWarning() {
-		super.didReceiveMemoryWarning()
-		// Dispose of any resources that can be recreated.
-	}
-
-	// Get rid of the keyboard when touching outside
-	override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
-		self.view.endEditing(true);
-	}
-	// Get rid of keyboard when hitting return
-	func textFieldShouldReturn(textField: UITextField) -> Bool {
-	textField.resignFirstResponder();
-		return true;
-	}
-	@IBAction func hideKeyboardOnClick(sender: AnyObject) {
-		self.view.endEditing(true);
-
-		self.UIFieldAirport.resignFirstResponder()
-		self.UIFieldCategory.resignFirstResponder()
-		self.UIFieldSummary.resignFirstResponder()
-		self.UIFieldTime.resignFirstResponder()
-	}
-
-	func textFieldDidBeginEditing(textField: UITextField) {
-		textField.becomeFirstResponder()
-	}
-
-	@IBAction func editCategory(sender: UITextField) {
-		performSegueWithIdentifier("SegueSelectCategory", sender: self)
-	}
-
-	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-		if segue.identifier == "SegueSelectCategory" {
-			var destinationViewController = segue.destinationViewController as! ViewAddEventCategory
-
-			if let currentCategory = UIFieldCategory.text {
-				destinationViewController.currentCategory = currentCategory
-			}
+			createEventEntry()
 		}
 	}
 
-	override func canBecomeFirstResponder() -> Bool {
-		return true
+	func createEventEntry() {
+		let entityDescription =
+		NSEntityDescription.entityForName("EventEntry",
+			inManagedObjectContext: managedObjectContext!)
+		let event = EventEntry(entity: entityDescription!,
+			insertIntoManagedObjectContext: managedObjectContext)
+
+		event.faa_code = UIFieldAirport.text
+		event.category_title = UIFieldCategory.text
+		event.event_text = UIFieldSummary.text
+		event.in_weekly_report = UISwitchInWeeklyReport.on
+
+		var tempDate:String = UIFieldTime.text
+		event.event_time = dateFormatter.dateFromString (tempDate)!
+
+		var error: NSError?
+		managedObjectContext?.save(&error)
+		if let err = error {
+			// Should only happen if the internal object becomes unwritable.
+			let saveErrorAlert = UIAlertController(title: "Save Failed", message: "Restart or Reinstall app.", preferredStyle: .Alert)
+			saveErrorAlert.addAction(UIAlertAction(title: "Dismiss",
+				style: UIAlertActionStyle.Default,
+				handler: {(alert: UIAlertAction!) in}))
+			self.presentViewController(saveErrorAlert, animated: true, completion: nil)
+		}
+		else {
+			var vc = self.storyboard?.instantiateViewControllerWithIdentifier("TabBarViewController") as! TabBarViewController
+			self.presentViewController(vc, animated: true, completion: nil)
+		}
+	}
+
+	@IBAction func editEventTime(sender: UITextField) {
+		datePicker.datePickerMode = UIDatePickerMode.DateAndTime
+		sender.inputView = datePicker
+		datePicker.addTarget(self, action: Selector("setEventTime:"), forControlEvents: UIControlEvents.ValueChanged)
+	}
+
+	func setEventTime(sender: UIDatePicker) {
+		UIFieldTime.text = dateFormatter.stringFromDate(sender.date)
 	}
 
 	@IBAction func editAirport(sender: UITextField) {
@@ -213,7 +157,65 @@ class ViewAddEvent: UITableViewController, UITextFieldDelegate, UITextViewDelega
 		}
 	}
 
-	// Returns to this view controller
+	@IBAction func editCategory(sender: UITextField) {
+		performSegueWithIdentifier("SegueSelectCategory", sender: self)
+	}
+
+	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+		if segue.identifier == "SegueSelectCategory" {
+			var destinationViewController = segue.destinationViewController as! ViewAddEventCategory
+
+			if let currentCategory = UIFieldCategory.text {
+				destinationViewController.currentCategory = currentCategory
+			}
+		}
+		else if segue.identifier == "SegueAddEventToRegions" {
+			var destinationViewController = segue.destinationViewController as! ViewAddEventRegion
+
+			destinationViewController.currentRegion = currentRegion
+			destinationViewController.currentDistrict = currentDistrict
+			destinationViewController.currentHub = currentHub
+			destinationViewController.currentAirport = UIFieldAirport.text
+		}
+		else if segue.identifier == "SegueAddEventToDistricts" {
+			var destinationViewController = segue.destinationViewController as! ViewAddEventDistrict
+
+			destinationViewController.currentRegion = currentRegion
+			destinationViewController.currentDistrict = currentDistrict
+			destinationViewController.currentHub = currentHub
+			destinationViewController.currentAirport = UIFieldAirport.text
+		}
+		else if segue.identifier == "SegueAddEventToHubs" {
+			var destinationViewController = segue.destinationViewController as! ViewAddEventHub
+
+			destinationViewController.currentRegion = currentRegion
+			destinationViewController.currentDistrict = currentDistrict
+			destinationViewController.currentHub = currentHub
+			destinationViewController.currentAirport = UIFieldAirport.text
+		}
+		else if segue.identifier == "SegueAddEventToAirports" {
+			var destinationViewController = segue.destinationViewController as! ViewAddEventAirport
+
+			destinationViewController.currentRegion = currentRegion
+			destinationViewController.currentDistrict = currentDistrict
+			destinationViewController.currentHub = currentHub
+			destinationViewController.currentAirport = UIFieldAirport.text
+		}
+	}
+
+	override func canBecomeFirstResponder() -> Bool {
+		return true
+	}
+
+	func textFieldDidBeginEditing(textField: UITextField) {
+		textField.becomeFirstResponder()
+	}
+
 	@IBAction func ButtonReturnToAddEvent(segue: UIStoryboardSegue) {
+	}
+
+	override func didReceiveMemoryWarning() {
+		super.didReceiveMemoryWarning()
+		// Dispose of any resources that can be recreated.
 	}
 }

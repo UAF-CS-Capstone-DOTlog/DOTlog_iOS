@@ -15,8 +15,10 @@ class ViewAddEventAirport: UITableViewController {
 	let managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
 
 	var airports : [String] = []
-	var currentAirport : String? = nil
+	var currentAirport : String?
 	var currentHub : String?
+	var currentDistrict : String?
+	var currentRegion : String?
 
 	override func viewWillAppear(animated: Bool){
 		super.viewWillAppear(animated)
@@ -33,14 +35,12 @@ class ViewAddEventAirport: UITableViewController {
 
 	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 		var cell : UITableViewCell?
-
 		if airports[indexPath.row] == currentAirport {
 			cell = tableView.dequeueReusableCellWithIdentifier("selectedAirportCell") as! UITableViewCell?
 		}
 		else {
 			cell = tableView.dequeueReusableCellWithIdentifier("airportCell") as! UITableViewCell?
 		}
-
 		cell?.textLabel?.text = airports[indexPath.row]
 
 		return cell!
@@ -65,9 +65,11 @@ class ViewAddEventAirport: UITableViewController {
 	}
 
 	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-		// different
 		if segue.identifier == "SegueAirportsToAddEvent" {
 			var destinationViewController = segue.destinationViewController as! ViewAddEvent
+			destinationViewController.currentRegion = currentRegion
+			destinationViewController.currentDistrict = currentDistrict
+			destinationViewController.currentHub = currentHub
 			destinationViewController.UIFieldAirport.text = currentAirport
 		}
 	}
