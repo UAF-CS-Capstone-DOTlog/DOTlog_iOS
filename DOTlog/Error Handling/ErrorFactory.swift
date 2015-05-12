@@ -19,7 +19,7 @@ class ErrorFactory {
 
 		var errorTitle = "Unable to Sync"
 		var errorDetailTitle = "Error Code: \(code)"
-		var errorMessage = "Contact Regional Aviation Office If Problem Persists."
+		var errorMessage : String? = "Contact Regional Aviation Office If Problem Persists."
 		var errorDetailMessage = error.localizedDescription
 
 		if let detailMessage : [NSObject : AnyObject] = error.userInfo {
@@ -30,7 +30,27 @@ class ErrorFactory {
 
 		if code == 401 {
 			errorTitle = error.domain
-			errorMessage = ""
+			errorMessage = nil
+		}
+
+		if code == 430 {
+			errorTitle = "Delete all events and sync before recreating"
+			errorMessage = "User does not have access to airports they are submitting for."
+		}
+
+		if code == 431 {
+			errorTitle = "Delete all events and sync before recreating"
+			errorMessage = "Airport not found in database."
+		}
+
+		if code == 432 {
+			errorTitle = "Delete all events and sync before recreating"
+			errorMessage = "Category not found in database."
+		}
+
+		if code == 445 {
+			errorTitle = "Contact Supervisor - Account does not have access to DOTlog"
+			errorMessage = nil
 		}
 
 		if code == -1003 {

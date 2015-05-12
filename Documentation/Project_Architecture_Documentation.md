@@ -11,10 +11,11 @@ DOTlog iOS provides a mechanism for DOTlog event creation. Users login to the ap
 ## 1.3 Revision History
 
 
-| **Date**          | **Comment**       | **Author**         |
-|-------------------|-------------------|--------------------|
-| 2015-05-04        | Initial Version   | William Showalter  |
-|                   |                   |                    |
+| **Date**          | **Comment**         | **Author**         |
+|-------------------|---------------------|--------------------|
+| 2015-05-04        | Initial Version     | William Showalter  |
+| 2015-05-11        | Updated error codes | William Showalter  |
+|                   |                     |                    |
 
 
 **Table of Contents**
@@ -76,7 +77,7 @@ Xcode 6.3 (for compilation)
 
 # **Section 3 - System Architecture**
 
-![iOS Sync Architecture](https://github.com/williamshowalter/DOTlog_iOS/blob/master/Documentation/Assets/iOSSyncArchitecture.png)
+![iOS Sync Architecture](/Documentation/Assets/iOSSyncArchitecture.png)
 
 DOTlog iOS will be integrate with the DOTlog ColdFusion web application, performing Windows(NTLM) authentication to the web server and performing syncing with the DOTlog API.
 
@@ -84,7 +85,7 @@ DOTlog iOS will be integrate with the DOTlog ColdFusion web application, perform
 
 # **Section 4 - Core Data Model**
 
-![iOS CoreData](https://github.com/williamshowalter/DOTlog_iOS/blob/master/Documentation/Assets/iOSCoreData.png)
+![iOS CoreData](/Documentation/Assets/iOSCoreData.png)
 
 Local storage is achieved using Apple’s built in Core Data model utilities. An entity description is provided below.
 
@@ -92,7 +93,7 @@ Local storage is achieved using Apple’s built in Core Data model utilities. An
 
 ## 5.1 iOS Storyboard and Views
 
-![Storyboard Diagram](https://github.com/williamshowalter/DOTlog_iOS/blob/master/Documentation/Assets/iOSStoryboard.png)
+![Storyboard Diagram](/Documentation/Assets/iOSStoryboard.png)
 
 The iOS app uses a number of types of view components. 
 
@@ -126,7 +127,7 @@ ViewAccountsSettingsTableView - Allows for well formatted data presentation.
 
 
 
-![API Sync UML](https://github.com/williamshowalter/DOTlog_iOS/blob/master/Documentation/Assets/iOSSyncUML.png)
+![API Sync UML](/Documentation/Assets/iOSSyncUML.png)
 
 UML Class diagram of the classes involved in the API handling.
 
@@ -274,15 +275,21 @@ A number of events will cause an alert to be displayed to the user, and are docu
 
 ### 7.2.3 Events API Errors
 
-**Error Code** : 30
+**Error Code** : 430
 
-**Description of Problem** : 
+**Description of Problem** : User is submitting events for airports they do not own. To resolve, delete and recreate events in the app after deleting all events and resyncing.
 
 
 
-**Error Code** : 31
+**Error Code** : 431
 
-**Description of Problem** : 
+**Description of Problem** : Airport not found in database
+
+
+
+**Error Code** : 432
+
+**Description of Problem** : Category not found in database
 
 
 
